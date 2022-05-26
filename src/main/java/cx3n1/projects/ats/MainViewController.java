@@ -48,9 +48,15 @@ public class MainViewController implements Initializable {
 
     public void onClickSaveButton(ActionEvent actionEvent) {
 
-        String presetPath = ATSWatchman.RESOURCE_DIRECTORY + "\\" + ATSWatchman.CURRENTLY_SELECTED_PRESET + ".properties";
+        String presetPath = ATSWatchman.RESOURCE_DIRECTORY + "\\" + ATSWatchman.CURRENTLY_SELECTED_PRESET_NAME + ".properties";
 
-        if (fileDoesNotExistsAndCouldNotBeCreated(presetPath)) return;
+        try {
+            createFileIfItDoesNotExists(presetPath);
+        } catch (IOException e) {
+            errorAlert("Couldn't create preset!");
+            e.printStackTrace();
+            return;
+        }
 
         try (FileOutputStream os = new FileOutputStream(presetPath)) {
             fillInProperties(os);
@@ -60,10 +66,14 @@ public class MainViewController implements Initializable {
             return;
         }
 
-        //exit out of config window
+        //TODO: if LOADED_PRESET.hasSamePath(presetPath), load it again
 
         confirmAlert("your preset has been saved!");
+
+        //exit out of config window
     }
+
+    //TODO: add preset selector which will define/load ATSWatchman.LOADED_PRESET also it will stop WAITER_THREAD and launch ATSLogic.mainLogic again with this new preset
 
     public void onSliding() {
         txtf_warning_time.setText(Long.toString(Math.round(sld_warning_time.getValue())));
@@ -90,17 +100,10 @@ public class MainViewController implements Initializable {
         prop.store(os, "Stored new preset" + LocalTime.now());
     }
 
-    private boolean fileDoesNotExistsAndCouldNotBeCreated(String presetPath) {
+    private void createFileIfItDoesNotExists(String presetPath) throws IOException {
         if(!Files.exists(Path.of(presetPath))) {
-            try {
-                Files.createFile(Path.of(presetPath));
-            } catch (IOException e) {
-                errorAlert("Couldn't create preset!");
-                e.printStackTrace();
-                return true;
-            }
+            Files.createFile(Path.of(presetPath));
         }
-        return false;
     }
 
     public static void errorAlert(String text){

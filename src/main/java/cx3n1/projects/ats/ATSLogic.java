@@ -3,26 +3,25 @@ package cx3n1.projects.ats;
 import org.apache.commons.lang3.SystemUtils;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.TemporalUnit;
 
 public class ATSLogic {
 
-    private static final LocalTime SHUTDOWN_TIME = LocalTime.of(23, 0);
+    public static void mainLogic() throws Exception {
+        Preset currentPreset = ATSWatchman.LOADED_PRESET;
 
-    public static void mainLogic() throws InterruptedException {
-        //load current preset
-        //if day is appropriate go on next else exit
-        //if time is appropriate shutdown after delay else start waiting thread which will wait till time is right or preset is changed
-        //call shutdown after delay
-        //end
+        if(!currentPreset.checkIfTodayIsSelectedDay(LocalDate.now().getDayOfWeek()))
+            return;
 
-
-        int secondsLeftTillShutdown = SHUTDOWN_TIME.toSecondOfDay() - LocalTime.now().toSecondOfDay();
-
-        //if less than 10 minutes are left till shutdown then return
-        if(secondsLeftTillShutdown <= 600) return;
-
-        Thread.sleep(secondsLeftTillShutdown* 1000L - 600*1000L);
+        if(LocalTime.now().plusMinutes(currentPreset.getWarningTime()).isBefore(currentPreset.getTimeOfShutdown())){
+            ATSWatchman.WAITER_THREAD = new Thread(new WaiterRunnable());
+            ATSWatchman.WAITER_THREAD.start();
+        } else {
+            shutDownAfterGivenMinutes(currentPreset.getWarningTime());
+        }
     }
 
     public static void shutDownAfterGivenMinutes(int minutes) throws IOException {

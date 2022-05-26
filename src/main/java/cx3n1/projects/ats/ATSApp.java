@@ -28,8 +28,15 @@ public class ATSApp extends Application {
 
     @SneakyThrows
     public static void main(String[] args) {
-        //ATSLogic.sleepTill10MinutesAreLeftBeforeShutdown();
-        //ATSLogic.shutDownAfter11Minutes();
+        ATSWatchman.initialize();
+        ATSWatchman.LOGIC_THREAD = new Thread(() -> {
+            try {
+                ATSLogic.mainLogic();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        ATSWatchman.LOGIC_THREAD.start();
         launch();
     }
 }
