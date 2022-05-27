@@ -13,8 +13,8 @@ import java.io.IOException;
 public class ATSApp extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(ATSApp.class.getResource("Main-View.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 600, 400);
+        FXMLLoader fxmlLoader = new FXMLLoader(ATSApp.class.getResource("Config-View.fxml"));
+        Scene scene = new Scene(fxmlLoader.load(), 490, 302);
 
         stage.setTitle("ATS config");
         stage.setResizable(false);
