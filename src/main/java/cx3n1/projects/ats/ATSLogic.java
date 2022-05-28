@@ -1,12 +1,13 @@
 package cx3n1.projects.ats;
 
+import cx3n1.projects.ats.data.Preset;
+import cx3n1.projects.ats.runnables.ProgressBarRunnable;
+import cx3n1.projects.ats.runnables.WaiterRunnable;
 import org.apache.commons.lang3.SystemUtils;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.temporal.TemporalUnit;
 
 public class ATSLogic {
 
@@ -15,6 +16,9 @@ public class ATSLogic {
 
         if(!currentPreset.checkIfTodayIsSelectedDay(LocalDate.now().getDayOfWeek()))
             return;
+
+        ATSWatchman.PROGRESS_BAR_THREAD = new Thread(new ProgressBarRunnable());
+        ATSWatchman.PROGRESS_BAR_THREAD.start();
 
         if(LocalTime.now().plusMinutes(currentPreset.getWarningTime()).isBefore(currentPreset.getTimeOfShutdown())){
             ATSWatchman.WAITER_THREAD = new Thread(new WaiterRunnable());

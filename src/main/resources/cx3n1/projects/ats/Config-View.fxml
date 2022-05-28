@@ -13,7 +13,7 @@
 <?import javafx.scene.text.Text?>
 <?import jfxtras.scene.control.LocalTimePicker?>
 
-<AnchorPane prefHeight="302.0" prefWidth="490.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cx3n1.projects.ats.ConfigViewController">
+<AnchorPane prefHeight="302.0" prefWidth="490.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cx3n1.projects.ats.controllers.ConfigViewController">
    <children>
       <AnchorPane layoutX="14.0" layoutY="75.0">
          <children>

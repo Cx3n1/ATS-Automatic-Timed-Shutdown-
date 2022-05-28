@@ -11,7 +11,7 @@
 <?import javafx.scene.text.Text?>
 <?import jfxtras.scene.layout.VBox?>
 
-<AnchorPane prefHeight="388.0" prefWidth="370.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cx3n1.projects.ats.MainViewController">
+<AnchorPane prefHeight="388.0" prefWidth="370.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cx3n1.projects.ats.controllers.MainViewController">
    <children>
       <AnchorPane layoutX="15.0" layoutY="64.0" prefHeight="314.0" prefWidth="313.0">
          <children>
@@ -22,7 +22,7 @@
                         <Font name="Consolas" size="22.0" />
                      </font>
                   </Text>
-                  <TextField maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="240.0">
+                  <TextField fx:id="txtf_current_preset" editable="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="240.0">
                      <VBox.margin>
                         <Insets bottom="7.0" />
                      </VBox.margin>
@@ -34,20 +34,30 @@
                   </Text>
                   <HBox spacing="7.0">
                      <children>
-                        <ListView prefHeight="200.0" prefWidth="240.0" />
+                        <ListView fx:id="lstv_available_presets" prefHeight="200.0" prefWidth="240.0" />
                         <VBox spacing="10.0">
                            <children>
-                              <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="91.0" text="Set Preset">
+                              <Button fx:id="btn_set_preset" mnemonicParsing="false" prefHeight="25.0" prefWidth="91.0" text="Set Preset">
                                  <font>
                                     <Font name="Consolas" size="13.0" />
                                  </font>
                               </Button>
-                              <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="91.0" text="Add New">
+                              <Button fx:id="btn_add_new" mnemonicParsing="false" prefHeight="25.0" prefWidth="91.0" text="Add New">
                                  <font>
                                     <Font name="Consolas" size="13.0" />
                                  </font>
                               </Button>
-                              <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="91.0" text="Edit">
+                              <Button fx:id="btn_delete" mnemonicParsing="false" prefHeight="25.0" prefWidth="91.0" text="Delete">
+                                 <font>
+                                    <Font name="Consolas" size="13.0" />
+                                 </font>
+                              </Button>
+                              <Button fx:id="btn_edit" mnemonicParsing="false" prefHeight="25.0" prefWidth="91.0" text="Edit">
+                                 <font>
+                                    <Font name="Consolas" size="13.0" />
+                                 </font>
+                              </Button>
+                              <Button fx:id="btn_reload" mnemonicParsing="false" onAction="#onClickReload" prefHeight="25.0" prefWidth="91.0" text="Reload">
                                  <font>
                                     <Font name="Consolas" size="13.0" />
                                  </font>

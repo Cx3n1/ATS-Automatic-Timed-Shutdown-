@@ -1,11 +1,10 @@
-package cx3n1.projects.ats;
+package cx3n1.projects.ats.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
-public class ATSController {
+public class WarningViewController {
     @FXML
     private Button btn_Understand;
 

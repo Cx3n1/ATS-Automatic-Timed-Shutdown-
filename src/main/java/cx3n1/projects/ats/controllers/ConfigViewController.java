@@ -1,5 +1,6 @@
-package cx3n1.projects.ats;
+package cx3n1.projects.ats.controllers;
 
+import cx3n1.projects.ats.ATSWatchman;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;

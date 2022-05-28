@@ -1,4 +1,6 @@
-package cx3n1.projects.ats;
+package cx3n1.projects.ats.data;
+
+import cx3n1.projects.ats.ATSWatchman;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -136,9 +138,9 @@ public class Preset {
 
     //*** Utils ***\\
     private static void checkIfAllPropertiesArePresentInFile(Properties prop) throws Exception {
-        for (int i = 0; i < ATSWatchman.PROPERTY_KEY_NAMES.length; i++) {
-            if (!prop.containsKey(ATSWatchman.PROPERTY_KEY_NAMES[i]))
-                throw new Exception("Error: property " + ATSWatchman.PROPERTY_KEY_NAMES[i] + "is missing");
+        for (String key : ATSWatchman.PROPERTY_KEY_NAMES){
+            if (!prop.containsKey(key))
+                throw new Exception("Error: property " + key + "is missing");
         }
     }
 
