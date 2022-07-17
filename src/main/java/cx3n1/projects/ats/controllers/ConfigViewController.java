@@ -1,9 +1,13 @@
 package cx3n1.projects.ats.controllers;
 
 import cx3n1.projects.ats.ATSWatchman;
+import cx3n1.projects.ats.Alerts;
+import cx3n1.projects.ats.data.Preset;
+import cx3n1.projects.ats.interfaces.Updatable;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
 import jfxtras.scene.control.LocalTimePicker;
 
 import java.io.FileOutputStream;
@@ -23,6 +27,8 @@ public class ConfigViewController implements Initializable {
     public Slider sld_warning_time;
     public TextField txtf_warning_time;
 
+    public TextField txtf_name;
+
     public CheckBox chck_monday;
     public CheckBox chck_tuesday;
     public CheckBox chck_wednesday;
@@ -31,66 +37,101 @@ public class ConfigViewController implements Initializable {
     public CheckBox chck_saturday;
     public CheckBox chck_sunday;
 
-    public TextField txtf_tts_hours;
-    public TextField txtf_tts_minutes;
-    public TextField txtf_tts_seconds;
-    public ProgressBar prgb_tts_progress;
-
     public Button btn_save;
-
+    public Button btn_cancel;
 
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         sld_warning_time.valueProperty().addListener((observableValue, number, t1) -> onSliding());
+
+        txtf_name.setText(ATSWatchman.CURRENTLY_EDITED_PRESET_NAME);
+
+        try {
+            fillConfigWindowFromPreset(ATSWatchman.getPresetFilePath(ATSWatchman.CURRENTLY_EDITED_PRESET_NAME));
+        } catch (Exception e) {
+            Alerts.error("Couldn't load preset");
+            e.printStackTrace();
+            closeThisWindow();
+        }
     }
 
     public void onClickSaveButton(ActionEvent actionEvent) {
+        boolean confirmed = Alerts.confirm("Are you sure you want to save?","You cannot undo changes after you save!");
 
-        String presetPath = ATSWatchman.RESOURCE_DIRECTORY + "\\" + ATSWatchman.CURRENTLY_SELECTED_PRESET_NAME + ".properties";
+        if(!confirmed) return;
+
+        if(txtf_name.getText() == null || txtf_name.getText().isEmpty()){
+            Alerts.error("Preset name cannot be empty");
+            return;
+        }
+
+        String presetPath = ATSWatchman.RESOURCE_DIRECTORY_ABS_PATH + "\\" + txtf_name.getText() + ".properties";
 
         try {
             createFileIfItDoesNotExists(presetPath);
         } catch (IOException e) {
-            errorAlert("Couldn't create preset!");
+            Alerts.error("Couldn't create preset!");
             e.printStackTrace();
             return;
         }
 
         try (FileOutputStream os = new FileOutputStream(presetPath)) {
-            fillInProperties(os);
+            fillInPropertiesFromConfigWindow(os);
         } catch (IOException e) {
-            errorAlert("Couldn't find/open/modify preset!");
+            Alerts.error("Couldn't find/open/modify preset!");
             e.printStackTrace();
             return;
         }
 
-        //TODO: if LOADED_PRESET.hasSamePath(presetPath), load it again
+        if(!txtf_name.getText().equals(ATSWatchman.CURRENTLY_EDITED_PRESET_NAME)){
+            try {
+                Files.delete(Path.of(ATSWatchman.RESOURCE_DIRECTORY_ABS_PATH + "\\" + ATSWatchman.CURRENTLY_EDITED_PRESET_NAME + ".properties"));
+            } catch (IOException e) {
+                Alerts.error("Couldn't delete old preset file!");
+                e.printStackTrace();
+            }
+        }
 
-        confirmAlert("your preset has been saved!");
+        if(ATSWatchman.CURRENTLY_EDITED_PRESET_NAME.equals(ATSWatchman.CURRENTLY_ACTIVE_PRESET_NAME)){
+            ATSWatchman.changeLoadedPreset(txtf_name.getText());
+        }
 
-        //exit out of config window
+        closeThisWindow();
     }
 
-    public void onClickCancelButton(ActionEvent actionEvent){
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("Warning!");
-        alert.setHeaderText("Do you want to cancel?");
-        alert.setContentText("If you cancel all changes will be lost");
+    public void onClickCancelButton(ActionEvent actionEvent) {
+        boolean confirm = Alerts.confirm("Are you sure you want to cancel?","If you cancel all unsaved changes will be lost!");
 
-        alert.showAndWait();
-        //TODO: if ok is pressed close the window else close the alert
+        if(confirm) closeThisWindow();
     }
-
-    //TODO: add preset selector which will define/load ATSWatchman.LOADED_PRESET also it will stop WAITER_THREAD and launch ATSLogic.mainLogic again with this new preset
 
     public void onSliding() {
         txtf_warning_time.setText(Long.toString(Math.round(sld_warning_time.getValue())));
     }
 
+    public void fillConfigWindowFromPreset(Path pathToPreset) throws Exception {
+        fillConfigWindowFromPreset(Preset.loadPreset(pathToPreset));
+    }
+
 
     //** Utils **\\
-    private void fillInProperties(FileOutputStream os) throws IOException {
+    public void fillConfigWindowFromPreset(Preset preset){
+        tpkr_shutdown_time.setLocalTime(preset.getTimeOfShutdown());
+
+        txtf_warning_time.setText(String.valueOf(preset.getWarningTime()));
+        sld_warning_time.setValue(preset.getWarningTime());
+
+        chck_monday.setSelected(preset.getDays()[0]);
+        chck_tuesday.setSelected(preset.getDays()[1]);
+        chck_wednesday.setSelected(preset.getDays()[2]);
+        chck_thursday.setSelected(preset.getDays()[3]);
+        chck_friday.setSelected(preset.getDays()[4]);
+        chck_saturday.setSelected(preset.getDays()[5]);
+        chck_sunday.setSelected(preset.getDays()[6]);
+    }
+
+    private void fillInPropertiesFromConfigWindow(FileOutputStream os) throws IOException {
         Properties prop = new Properties();
 
         prop.setProperty("time.shutdown.hour", Integer.toString(tpkr_shutdown_time.getLocalTime().getHour()));
@@ -110,27 +151,16 @@ public class ConfigViewController implements Initializable {
     }
 
     private void createFileIfItDoesNotExists(String presetPath) throws IOException {
-        if(!Files.exists(Path.of(presetPath))) {
+        if (!Files.exists(Path.of(presetPath))) {
             Files.createFile(Path.of(presetPath));
         }
     }
 
-    public static void errorAlert(String text){
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error!");
-        alert.setHeaderText("There has been an error");
-        alert.setContentText(text);
-
-        alert.showAndWait();
+    private void closeThisWindow() {
+        Stage stage = (Stage) btn_save.getScene().getWindow();
+        stage.close();
     }
 
-    public static void confirmAlert(String text){
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Preset Saved");
-        alert.setHeaderText("Congratulations!");
-        alert.setContentText(text);
 
-        alert.showAndWait();
-    }
 
 }

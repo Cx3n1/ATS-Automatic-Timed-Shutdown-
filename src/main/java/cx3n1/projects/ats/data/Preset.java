@@ -25,30 +25,13 @@ public class Preset {
         this.days = days;
     }
 
+
+    //*** Preset manipulation ***\\
     public static Preset CreateNewPresetDefault(Path pathToPreset) throws Exception {
         if (!Files.exists(pathToPreset))
             Files.createFile(pathToPreset);
 
-        //TODO: implement this better maybe load default preset or smth
-        try (FileOutputStream fos = new FileOutputStream(pathToPreset.toFile())) {
-
-            Properties prop = new Properties();
-
-            prop.setProperty("time.shutdown.hour", "21");
-            prop.setProperty("time.shutdown.minute", "43");
-
-            prop.setProperty("time.warning", "10");
-
-            prop.setProperty("day.monday", "true");
-            prop.setProperty("day.tuesday", "true");
-            prop.setProperty("day.wednesday", "true");
-            prop.setProperty("day.thursday", "true");
-            prop.setProperty("day.friday", "true");
-            prop.setProperty("day.saturday", "true");
-            prop.setProperty("day.sunday", "true");
-
-            prop.store(fos, "Stored new preset" + LocalTime.now());
-        }
+        fillInPropertiesFileWithDefaults(pathToPreset);
 
         return loadPreset(pathToPreset);
     }
@@ -100,6 +83,8 @@ public class Preset {
     }
 
 
+
+    //*** Other ***\\
     public boolean checkIfTodayIsSelectedDay(DayOfWeek dayOfWeek) {
         switch (dayOfWeek) {
             case MONDAY:
@@ -127,6 +112,9 @@ public class Preset {
         return timeOfShutdown;
     }
 
+    /**
+     * @return warning time in minutes
+     */
     public int getWarningTime() {
         return warningTime;
     }
@@ -137,6 +125,28 @@ public class Preset {
 
 
     //*** Utils ***\\
+    private static void fillInPropertiesFileWithDefaults(Path pathToPreset) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(pathToPreset.toFile())) {
+
+            Properties prop = new Properties();
+
+            prop.setProperty("time.shutdown.hour", "22");
+            prop.setProperty("time.shutdown.minute", "50");
+
+            prop.setProperty("time.warning", "10");
+
+            prop.setProperty("day.monday", "true");
+            prop.setProperty("day.tuesday", "true");
+            prop.setProperty("day.wednesday", "true");
+            prop.setProperty("day.thursday", "true");
+            prop.setProperty("day.friday", "true");
+            prop.setProperty("day.saturday", "true");
+            prop.setProperty("day.sunday", "true");
+
+            prop.store(fos, "Stored new preset" + LocalTime.now());
+        }
+    }
+
     private static void checkIfAllPropertiesArePresentInFile(Properties prop) throws Exception {
         for (String key : ATSWatchman.PROPERTY_KEY_NAMES){
             if (!prop.containsKey(key))

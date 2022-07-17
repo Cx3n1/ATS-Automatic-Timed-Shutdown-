@@ -26,7 +26,14 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.22</version>
+            <version>1.18.24</version>
+        </dependency>
+
+        <!-- quartz -->
+        <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
+            <version>2.3.2</version>
         </dependency>
 
         <!-- commons-lang3 -->
@@ -36,7 +43,7 @@
             <version>3.12.0</version>
         </dependency>
 
-        <!-- jfextras -->
+        <!-- JFextras -->
         <dependency>
             <groupId>org.jfxtras</groupId>
             <artifactId>jfxtras-common</artifactId>

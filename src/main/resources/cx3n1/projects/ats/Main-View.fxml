@@ -11,22 +11,37 @@
 <?import javafx.scene.text.Text?>
 <?import jfxtras.scene.layout.VBox?>
 
-<AnchorPane prefHeight="388.0" prefWidth="370.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cx3n1.projects.ats.controllers.MainViewController">
+<AnchorPane prefHeight="390.0" prefWidth="370.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cx3n1.projects.ats.controllers.MainViewController">
    <children>
       <AnchorPane layoutX="15.0" layoutY="64.0" prefHeight="314.0" prefWidth="313.0">
          <children>
             <VBox layoutY="14.0" spacing="5.0">
                <children>
-                  <Text fill="#514e4e" strokeType="OUTSIDE" strokeWidth="0.0" text="Current preset:" wrappingWidth="189.0">
-                     <font>
-                        <Font name="Consolas" size="22.0" />
-                     </font>
-                  </Text>
-                  <TextField fx:id="txtf_current_preset" editable="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="240.0">
-                     <VBox.margin>
-                        <Insets bottom="7.0" />
-                     </VBox.margin>
-                  </TextField>
+                  <AnchorPane>
+                     <children>
+                        <Text fill="#514e4e" layoutY="19.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Current preset:" wrappingWidth="189.0">
+                           <font>
+                              <Font name="Consolas" size="22.0" />
+                           </font>
+                        </Text>
+                        <TextField fx:id="txtf_current_preset" editable="false" layoutY="27.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="210.0" />
+                        <Text fill="#514e4e" layoutX="216.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Time Zone:" wrappingWidth="124.0">
+                           <font>
+                              <Font name="Consolas" size="22.0" />
+                           </font>
+                        </Text>
+                        <TextField fx:id="txtf_current_time_zone" alignment="CENTER" layoutX="216.0" layoutY="27.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="32.0" prefWidth="71.0" text="+4:00">
+                           <font>
+                              <Font name="Century Gothic Bold" size="15.0" />
+                           </font>
+                        </TextField>
+                        <Button fx:id="btn_set_time_zone" layoutX="292.0" layoutY="29.0" mnemonicParsing="false" onAction="#onClickSetTimeZone" prefHeight="28.0" prefWidth="48.0" text="Set">
+                           <font>
+                              <Font name="Consolas" size="13.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </AnchorPane>
                   <Text fill="#514e4e" strokeType="OUTSIDE" strokeWidth="0.0" text="Available Presets" wrappingWidth="210.0">
                      <font>
                         <Font name="Consolas" size="22.0" />
@@ -37,27 +52,27 @@
                         <ListView fx:id="lstv_available_presets" prefHeight="200.0" prefWidth="240.0" />
                         <VBox spacing="10.0">
                            <children>
-                              <Button fx:id="btn_set_preset" mnemonicParsing="false" prefHeight="25.0" prefWidth="91.0" text="Set Preset">
+                              <Button fx:id="btn_set_preset" mnemonicParsing="false" onAction="#onClickSetPreset" prefHeight="28.0" prefWidth="91.0" text="Set Preset">
                                  <font>
                                     <Font name="Consolas" size="13.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="btn_add_new" mnemonicParsing="false" prefHeight="25.0" prefWidth="91.0" text="Add New">
+                              <Button fx:id="btn_add_new" mnemonicParsing="false" onAction="#onClickAddNew" prefHeight="28.0" prefWidth="91.0" text="Add New">
                                  <font>
                                     <Font name="Consolas" size="13.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="btn_delete" mnemonicParsing="false" prefHeight="25.0" prefWidth="91.0" text="Delete">
+                              <Button fx:id="btn_delete" mnemonicParsing="false" onAction="#onClickDelete" prefHeight="28.0" prefWidth="91.0" text="Delete">
                                  <font>
                                     <Font name="Consolas" size="13.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="btn_edit" mnemonicParsing="false" prefHeight="25.0" prefWidth="91.0" text="Edit">
+                              <Button fx:id="btn_edit" mnemonicParsing="false" onAction="#onClickEdit" prefHeight="28.0" prefWidth="91.0" text="Edit">
                                  <font>
                                     <Font name="Consolas" size="13.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="btn_reload" mnemonicParsing="false" onAction="#onClickReload" prefHeight="25.0" prefWidth="91.0" text="Reload">
+                              <Button fx:id="btn_reload" mnemonicParsing="false" onAction="#onClickReload" prefHeight="28.0" prefWidth="91.0" text="Reload">
                                  <font>
                                     <Font name="Consolas" size="13.0" />
                                  </font>
@@ -80,21 +95,28 @@
                   <Insets top="7.0" />
                </padding>
             </ProgressBar>
-            <HBox layoutX="230.0" layoutY="1.0" prefHeight="25.0" prefWidth="124.0" spacing="5.0">
+            <HBox layoutX="224.0" layoutY="-4.0" prefHeight="35.0" prefWidth="124.0" spacing="5.0">
                <children>
-                  <TextField fx:id="txtf_tts_hours" editable="false" focusTraversable="false" prefHeight="25.0" prefWidth="30.0">
+                  <TextField fx:id="txtf_tts_hours" alignment="CENTER" editable="false" focusTraversable="false" prefHeight="32.0" prefWidth="42.0" text="0">
                      <font>
-                        <Font size="11.0" />
+                        <Font name="Century Gothic Bold" size="16.0" />
                      </font>
                   </TextField>
-                  <TextField fx:id="txtf_tts_minutes" editable="false" focusTraversable="false" prefHeight="25.0" prefWidth="30.0" />
-                  <TextField fx:id="txtf_tts_seconds" editable="false" focusTraversable="false" prefHeight="25.0" prefWidth="30.0" />
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text=":" textAlignment="CENTER" wrappingWidth="10.0">
+                     <font>
+                        <Font name="System Bold" size="20.0" />
+                     </font>
+                  </Text>
+                  <TextField fx:id="txtf_tts_minutes" alignment="CENTER" editable="false" focusTraversable="false" prefHeight="32.0" prefWidth="42.0" text="0">
+                     <font>
+                        <Font name="Century Gothic Bold" size="16.0" />
+                     </font></TextField>
                </children>
                <padding>
                   <Insets left="10.0" right="10.0" />
                </padding>
             </HBox>
-            <Text fill="#514e4e" layoutY="19.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Time till shutdown" wrappingWidth="231.0">
+            <Text fill="#514e4e" layoutX="6.0" layoutY="19.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Time of shutdown:" wrappingWidth="231.0">
                <font>
                   <Font name="Consolas" size="22.0" />
                </font>
