@@ -1,13 +1,13 @@
 package cx3n1.projects.ats.controllers;
 
+import cx3n1.projects.ats.ATSSettings;
 import cx3n1.projects.ats.ATSWatchman;
-import cx3n1.projects.ats.Alerts;
+import cx3n1.projects.ats.utilities.Alerts;
+import cx3n1.projects.ats.utilities.Utils;
 import cx3n1.projects.ats.data.Preset;
 import cx3n1.projects.ats.interfaces.Updatable;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -19,7 +19,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.DateTimeException;
 import java.time.LocalTime;
-import java.time.ZoneOffset;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
@@ -42,39 +41,57 @@ public class MainViewController implements Initializable, Updatable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         lstv_available_presets.setItems(listContent);
 
-        reloadPresetList();
+        try {
+            updateParameters();
+        } catch (IOException e) {
+            Alerts.error("Couldn't reload preset list!");
+            e.printStackTrace();
+        }
 
         ATSWatchman.addListener(this);
 
+        //TODO: progress bar thingie work this out later
         //startProgressBar();
     }
 
-    private void startProgressBar() {
+    //TODO: figure out progress bar
+    /*private void startProgressBar() {
         ATSWatchman.PROGRESS_BAR_THREAD = new Thread(getProgressbarUpdaterTask());
         ATSWatchman.PROGRESS_BAR_THREAD.setDaemon(true);
         ATSWatchman.PROGRESS_BAR_THREAD.start();
-    }
+    }*/
 
     public void onClickReload(ActionEvent actionEvent) {
-        reloadPresetList();
+        try {
+            updateParameters();
+        } catch (IOException e) {
+            Alerts.error("Couldn't reload preset list!");
+            e.printStackTrace();
+        }
     }
 
     public void onClickSetPreset(ActionEvent actionEvent) {
-        String selectedPreset = lstv_available_presets.getSelectionModel().getSelectedItem();
+        String selectedPreset = getSelectedItem();
 
         if(selectedPreset == null){
             Alerts.error("Please select preset you want to set!");
             return;
         }
 
-        ATSWatchman.changeLoadedPreset(selectedPreset);
-        reloadPresetList();
+        ATSSettings.setLoadedPreset(selectedPreset);
+        try {
+            updateParameters();
+        } catch (IOException e) {
+            Alerts.error("Couldn't reload preset list!");
+            e.printStackTrace();
+        }
     }
 
     public void onClickAddNew(ActionEvent actionEvent) {
         Path pathToPresetFile;
+
         try {
-            pathToPresetFile = createNewPresetFile();
+            pathToPresetFile = createUniquePresetFile();
         } catch (IOException e) {
             Alerts.error("Couldn't create new preset");
             e.printStackTrace();
@@ -90,26 +107,17 @@ public class MainViewController implements Initializable, Updatable {
         }
 
         try {
-            ATSWatchman.openConfigWindow(pathToPresetFile);
+            Utils.WindowCtrl.openConfigWindowOf(pathToPresetFile);
         } catch (IOException e) {
             Alerts.error("Couldn't edit new preset");
             e.printStackTrace();
         }
 
-    }
-
-    private Path createNewPresetFile() throws IOException {
-        long i = 0;
-
-        while (Files.exists(ATSWatchman.getPresetFilePath("New Preset " + i))){
-            i++;
-        }
-
-        return Files.createFile(ATSWatchman.getPresetFilePath("New Preset " + i));
+        ATSWatchman.notifyChange();
     }
 
     public void onClickDelete(ActionEvent actionEvent) {
-        String selectedPreset = lstv_available_presets.getSelectionModel().getSelectedItem();
+        String selectedPreset = getSelectedItem();
 
         if(selectedPreset == null){
             Alerts.error("Please select preset you want to delete!");
@@ -121,11 +129,17 @@ public class MainViewController implements Initializable, Updatable {
             return;
         }
 
-        removePreset(selectedPreset);
+        try {
+            removePreset(selectedPreset);
+        } catch (Exception e) {
+            Alerts.error("Couldn't delete selected preset!");
+            e.printStackTrace();
+        }
+
     }
 
     public void onClickEdit(ActionEvent actionEvent) {
-        String selectedPreset = lstv_available_presets.getSelectionModel().getSelectedItem();
+        String selectedPreset = getSelectedItem();
 
         if(selectedPreset == null || selectedPreset.isEmpty()){
             Alerts.error("Please select preset you want to edit!");
@@ -138,7 +152,7 @@ public class MainViewController implements Initializable, Updatable {
         }
 
         try {
-            ATSWatchman.openConfigWindow(selectedPreset);
+            Utils.WindowCtrl.openConfigWindowOf(selectedPreset);
         } catch (IOException e) {
             Alerts.error("Couldn't edit config!");
             e.printStackTrace();
@@ -147,34 +161,44 @@ public class MainViewController implements Initializable, Updatable {
 
     public void onClickSetTimeZone(ActionEvent actionEvent) {
         String zone_offset = "+0";
+
         try {
             zone_offset = txtf_current_time_zone.getText();
-            ATSWatchman.changeTimeZone(zone_offset);
+            ATSSettings.changeTimeZone(zone_offset);
         } catch (DateTimeException e) {
-            Alerts.error("Please select valid time zone: from -18:00 to +18:00 in format +/-hh:mm or +/-hh!\n(+/- means you write either - or +, eg +/-hh:mm => +04:30)");
+            Alerts.error("Please select valid time zone: from -18:00 to +18:00 in format +/-hh:mm or +/-hh!\n(+/- means you write either - or +, e.g. => +04:30, -10:01, +00, -04 etc.)");
             e.printStackTrace();
-            txtf_current_time_zone.setText(String.valueOf(ATSWatchman.ZONE_OFFSET));
+            txtf_current_time_zone.setText(String.valueOf(ATSSettings.ZONE_OFFSET));
             return;
         } catch (Exception e) {
             Alerts.error("Couldn't save data into data file!");
             e.printStackTrace();
-            txtf_current_time_zone.setText(String.valueOf(ATSWatchman.ZONE_OFFSET));
+            txtf_current_time_zone.setText(String.valueOf(ATSSettings.ZONE_OFFSET));
             return;
         }
+
         Alerts.info("Time Zone saved!", "You have successfully set new time zone.");
     }
 
     @Override
     public void update() {
-        LocalTime timeOfShutdown = ATSWatchman.LOADED_PRESET.getTimeOfShutdown();
+        LocalTime timeOfShutdown = ATSSettings.getLoadedShutdownTime();
 
         txtf_tts_hours.setText(String.valueOf(timeOfShutdown.getHour()));
         txtf_tts_minutes.setText(String.valueOf(timeOfShutdown.getMinute()));
+
+        try {
+            updateParameters();
+        } catch (IOException e) {
+            Alerts.error("Couldn't reload preset list!");
+            e.printStackTrace();
+        }
     }
 
 
     //*** Utility ***\\
-    public Task<Void> getProgressbarUpdaterTask() {
+    //TODO: Progress bar - work in progress (no pun intended)
+    /*public Task<Void> getProgressbarUpdaterTask() {
         return new Task<Void>() {
             @Override
             public Void call() {
@@ -205,43 +229,42 @@ public class MainViewController implements Initializable, Updatable {
             }
 
         };
+    }*/
+
+    private String getSelectedItem() {
+        return lstv_available_presets.getSelectionModel().getSelectedItem();
     }
 
+    private Path createUniquePresetFile() throws IOException {
+        long i = 0;
 
-    private void reloadPresetList() {
-        try {
-            updateParameters();
-        } catch (IOException e) {
-            Alerts.error(e.getMessage());
-            e.printStackTrace();
+        while (Files.exists(Utils.Paths.getPresetFilePath("New Preset " + i))){
+            i++;
         }
+
+        return Files.createFile(Utils.Paths.getPresetFilePath("New Preset " + i));
     }
 
-    private void removePreset(String givenPreset) {
+    private void removePreset(String givenPreset) throws Exception {
         listContent.remove(givenPreset);
-        try {
-            ATSWatchman.deletePresetFile(givenPreset);
-        } catch (Exception e) {
-            Alerts.error(e.getMessage());
-            e.printStackTrace();
-        }
+        Utils.deletePresetFile(givenPreset);
     }
 
     public void updateParameters() throws IOException {
-        txtf_current_preset.setText(ATSWatchman.CURRENTLY_ACTIVE_PRESET_NAME);
-        txtf_current_time_zone.setText(String.valueOf(ATSWatchman.ZONE_OFFSET));
+        txtf_current_preset.setText(ATSSettings.CURRENTLY_ACTIVE_PRESET_NAME);
+        txtf_current_time_zone.setText(String.valueOf(ATSSettings.ZONE_OFFSET));
         loadPresetList();
     }
 
     private void loadPresetList() throws IOException {
-        if (!Files.exists(ATSWatchman.RESOURCE_DIRECTORY_ABS_PATH)) {
+        if (!Files.exists(ATSSettings.RESOURCE_DIRECTORY_ABS_PATH)) {
             throw new FileNotFoundException();
         }
 
         listContent.clear();
 
-        for (String fileName : Objects.requireNonNull(ATSWatchman.RESOURCE_DIRECTORY_ABS_PATH.toFile().list())) {
-            String presetName = fileName.split("\\.")[0];
+        for (String fileName : Objects.requireNonNull(ATSSettings.RESOURCE_DIRECTORY_ABS_PATH.toFile().list())) {
+            String presetName = Utils.Paths.removeFileExtension(fileName);
             listContent.add(presetName);
         }
     }
@@ -250,6 +273,4 @@ public class MainViewController implements Initializable, Updatable {
         return givenPreset.equals(txtf_current_preset.getText()) || givenPreset.equals("Default");
         //this statically written Default seems like bad practice
     }
-
-
 }

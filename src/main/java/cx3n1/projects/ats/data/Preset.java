@@ -1,5 +1,6 @@
 package cx3n1.projects.ats.data;
 
+import cx3n1.projects.ats.ATSSettings;
 import cx3n1.projects.ats.ATSWatchman;
 
 import java.io.*;
@@ -83,27 +84,17 @@ public class Preset {
     }
 
 
-
     //*** Other ***\\
     public boolean checkIfTodayIsSelectedDay(DayOfWeek dayOfWeek) {
-        switch (dayOfWeek) {
-            case MONDAY:
-                return days[0];
-            case TUESDAY:
-                return days[1];
-            case WEDNESDAY:
-                return days[2];
-            case THURSDAY:
-                return days[3];
-            case FRIDAY:
-                return days[4];
-            case SATURDAY:
-                return days[5];
-            case SUNDAY:
-                return days[6];
-            default:
-                return false;
-        }
+        return switch (dayOfWeek) {
+            case MONDAY -> days[0];
+            case TUESDAY -> days[1];
+            case WEDNESDAY -> days[2];
+            case THURSDAY -> days[3];
+            case FRIDAY -> days[4];
+            case SATURDAY -> days[5];
+            case SUNDAY -> days[6];
+        };
     }
 
 
@@ -124,7 +115,7 @@ public class Preset {
     }
 
 
-    //*** Utils ***\\
+    //*** Utility ***\\
     private static void fillInPropertiesFileWithDefaults(Path pathToPreset) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(pathToPreset.toFile())) {
 
@@ -148,26 +139,24 @@ public class Preset {
     }
 
     private static void checkIfAllPropertiesArePresentInFile(Properties prop) throws Exception {
-        for (String key : ATSWatchman.PROPERTY_KEY_NAMES){
+        for (String key : ATSSettings.PROPERTY_KEY_NAMES){
             if (!prop.containsKey(key))
                 throw new Exception("Error: property " + key + "is missing");
         }
     }
 
     private static LocalTime loadShutdownTimeFrom(Properties prop) {
-        LocalTime timeOfShutdown = LocalTime.of(
+        return LocalTime.of(
                 Integer.parseInt(prop.getProperty("time.shutdown.hour", "22")),
                 Integer.parseInt(prop.getProperty("time.shutdown.minute", "50")));
-        return timeOfShutdown;
     }
 
     private static int loadWarningTimeFrom(Properties prop) {
-        int warningTime = Integer.parseInt(prop.getProperty("time.warning", "10"));
-        return warningTime;
+        return Integer.parseInt(prop.getProperty("time.warning", "10"));
     }
 
     private static boolean[] loadDaysFrom(Properties prop) {
-        boolean[] days = {
+        return new boolean[]{
                 Boolean.parseBoolean(prop.getProperty("day.monday", "true")),
                 Boolean.parseBoolean(prop.getProperty("day.tuesday", "true")),
                 Boolean.parseBoolean(prop.getProperty("day.wednesday", "true")),
@@ -176,7 +165,6 @@ public class Preset {
                 Boolean.parseBoolean(prop.getProperty("day.saturday", "true")),
                 Boolean.parseBoolean(prop.getProperty("day.sunday", "true")),
         };
-        return days;
     }
 
 }
