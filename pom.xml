@@ -13,7 +13,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.release>17</maven.compiler.release>
         <javafx.version>17.0.2</javafx.version>
         <javafx.maven.plugin.version>0.0.7</javafx.maven.plugin.version>
         <jfxtras.version>17-r1</jfxtras.version>
@@ -43,7 +43,7 @@
             <version>3.12.0</version>
         </dependency>
 
-        <!-- JFextras -->
+        <!-- JFXtras -->
         <dependency>
             <groupId>org.jfxtras</groupId>
             <artifactId>jfxtras-common</artifactId>
@@ -107,7 +107,7 @@
                 </configuration>
             </plugin>
 
-            <plugin>
+            <!--<plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.3.0</version>
                 <configuration>
@@ -124,7 +124,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
 
         </plugins>
     </build>

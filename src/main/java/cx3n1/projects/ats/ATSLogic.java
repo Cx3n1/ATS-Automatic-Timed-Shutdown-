@@ -1,8 +1,8 @@
 package cx3n1.projects.ats;
 
 import cx3n1.projects.ats.data.Preset;
-import cx3n1.projects.ats.runnables.ProgressBarRunnable;
 import cx3n1.projects.ats.jobs.ShutdownJob;
+import cx3n1.projects.ats.utilities.Alerts;
 import org.apache.commons.lang3.SystemUtils;
 import org.quartz.JobDetail;
 import org.quartz.SchedulerException;
@@ -18,15 +18,15 @@ import static org.quartz.TriggerBuilder.newTrigger;
 public class ATSLogic {
 
     public static void mainLogic() throws Exception {
-        Preset currentPreset = ATSWatchman.LOADED_PRESET;
+        Preset currentPreset = ATSSettings.getLoadedPreset();
 
         if(!currentPreset.checkIfTodayIsSelectedDay(LocalDate.now().getDayOfWeek()))
             return;
 
         //TODO: figure this out
-        ATSWatchman.PROGRESS_BAR_THREAD = new Thread(new ProgressBarRunnable());
+        /*ATSWatchman.PROGRESS_BAR_THREAD = new Thread(new ProgressBarRunnable());
         ATSWatchman.PROGRESS_BAR_THREAD.setDaemon(true);
-        ATSWatchman.PROGRESS_BAR_THREAD.start();
+        ATSWatchman.PROGRESS_BAR_THREAD.start();*/
 
         if(LocalTime.now().isBefore(currentPreset.getTimeOfShutdown())){
             scheduleShutdownWaiter(currentPreset);
@@ -48,22 +48,23 @@ public class ATSLogic {
             shutdownCommand = "shutdown -y -i5 -g" + minutes;
         else if(SystemUtils.IS_OS_WINDOWS)
             shutdownCommand = "shutdown.exe /s /t " + minutes*60; //Windows takes seconds as delay
-        else
+        else{
+            Alerts.error("We are sorry, but currently ATS doesn't support your operating system!");
             return;
+        }
 
         ATSWatchman.shutdownSequence();
         Runtime.getRuntime().exec(shutdownCommand);
     }
 
-
     private static void scheduleShutdownWaiter(Preset currentPreset) throws SchedulerException {
-        ATSWatchman.initializeShutdownScheduler();
+        ATSSettings.initializeShutdownScheduler();
 
         JobDetail job = newJob(ShutdownJob.class)
                 .withIdentity("waiter")
                 .build();
 
-        long epochTimeOfShutdown = currentPreset.getTimeOfShutdown().toEpochSecond(LocalDate.now(), ATSWatchman.ZONE_OFFSET);
+        long epochTimeOfShutdown = currentPreset.getTimeOfShutdown().toEpochSecond(LocalDate.now(), ATSSettings.ZONE_OFFSET);
         Date dateOfShutdown = new Date((epochTimeOfShutdown - (long) currentPreset.getWarningTime() * 60) * 1000);
 
         Trigger trigger = newTrigger()
@@ -71,6 +72,6 @@ public class ATSLogic {
                 .startAt(dateOfShutdown)
                 .build();
 
-        ATSWatchman.getShutdownScheduler().scheduleJob(job, trigger);
+        ATSSettings.getShutdownScheduler().scheduleJob(job, trigger);
     }
 }

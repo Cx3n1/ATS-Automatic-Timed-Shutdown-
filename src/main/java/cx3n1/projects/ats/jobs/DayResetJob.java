@@ -1,7 +1,7 @@
 package cx3n1.projects.ats.jobs;
 
 import cx3n1.projects.ats.ATSWatchman;
-import cx3n1.projects.ats.Alerts;
+import cx3n1.projects.ats.utilities.Alerts;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
