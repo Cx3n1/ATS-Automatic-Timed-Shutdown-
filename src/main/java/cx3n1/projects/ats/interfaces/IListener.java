@@ -1,5 +1,5 @@
 package cx3n1.projects.ats.interfaces;
 
-public interface Updatable {
+public interface IListener {
     void update();
 }

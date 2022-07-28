@@ -4,7 +4,6 @@ package cx3n1.projects.ats;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -27,7 +26,7 @@ public class ATSApp extends Application {
 
     public static void main(String[] args) {
         try {
-            ATSWatchman.initialiseEverything();
+            ATSWatchman.startupSequence();
         } catch (Exception e){
             e.printStackTrace();
             System.exit(1);

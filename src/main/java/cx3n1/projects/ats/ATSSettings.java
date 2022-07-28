@@ -2,7 +2,11 @@ package cx3n1.projects.ats;
 
 import cx3n1.projects.ats.data.Preset;
 import cx3n1.projects.ats.jobs.DayResetJob;
+import cx3n1.projects.ats.jobs.test;
 import cx3n1.projects.ats.utilities.Utils;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.quartz.JobDetail;
@@ -22,10 +26,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import static javafx.beans.binding.Bindings.createDoubleBinding;
 import static org.quartz.CronScheduleBuilder.dailyAtHourAndMinute;
 import static org.quartz.JobBuilder.newJob;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
+/**
+ * Class to store and manage access to all the important static variables in the project.
+ */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ATSSettings {
     /**
@@ -75,15 +84,49 @@ public class ATSSettings {
      */
     private static Scheduler DAY_RESET_SCHEDULER;
 
+
+    //***Testing area***\\
+
+    private static Scheduler PROGRESS_BAR_SCHEDULER;
+
+    public static DoubleProperty progress = new SimpleDoubleProperty(0);
+
+    public static void initializeProgressBarScheduler() throws SchedulerException {
+        if (PROGRESS_BAR_SCHEDULER != null)
+            killShutdownScheduler();
+        PROGRESS_BAR_SCHEDULER = StdSchedulerFactory.getDefaultScheduler();
+        PROGRESS_BAR_SCHEDULER.start();
+
+        JobDetail job = newJob(test.class)
+                .withIdentity("test")
+                .build();
+
+        //TODO: test if this works
+        Trigger trigger = newTrigger()
+                .withIdentity("testTrig")
+                .withSchedule(simpleSchedule()
+                        .withIntervalInSeconds(1)
+                        .repeatForever())
+                .startNow()
+                .build();
+
+        PROGRESS_BAR_SCHEDULER.scheduleJob(job, trigger);
+    }
+
+
+    //***End of testing area***\\
+
+
     /**
      * reference to thread which controls progress bar in main view
      */
+    @Deprecated
     public static Thread PROGRESS_BAR_THREAD;
 
-    @Deprecated
     /**
      * notifies threads that they should shut down
      */
+    @Deprecated
     public static Boolean THREADS_SHUTDOWN_COMMAND = false;
 
 
