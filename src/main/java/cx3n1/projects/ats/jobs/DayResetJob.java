@@ -10,7 +10,7 @@ public class DayResetJob implements Job {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         try {
-            ATSWatchman.initialiseEverything();
+            ATSWatchman.startupSequence();
         } catch (Exception e) {
             Alerts.error("Couldn't do end of the day system reinitialization!");
             e.printStackTrace();

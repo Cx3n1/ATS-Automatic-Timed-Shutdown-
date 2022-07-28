@@ -5,12 +5,13 @@ import cx3n1.projects.ats.ATSWatchman;
 import cx3n1.projects.ats.utilities.Alerts;
 import cx3n1.projects.ats.utilities.Utils;
 import cx3n1.projects.ats.data.Preset;
-import cx3n1.projects.ats.interfaces.Updatable;
+import cx3n1.projects.ats.interfaces.IListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import org.quartz.SchedulerException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,7 +23,7 @@ import java.time.LocalTime;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
-public class MainViewController implements Initializable, Updatable {
+public class MainViewController implements Initializable, IListener {
 
     public ProgressBar prgb_tts_progress;
     public TextField txtf_tts_hours;
@@ -52,6 +53,15 @@ public class MainViewController implements Initializable, Updatable {
 
         //TODO: progress bar thingie work this out later
         //startProgressBar();
+
+        prgb_tts_progress.progressProperty().bind(ATSSettings.progress);
+
+        try {
+            ATSSettings.initializeProgressBarScheduler();
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+        }
+
     }
 
     //TODO: figure out progress bar
@@ -197,40 +207,6 @@ public class MainViewController implements Initializable, Updatable {
 
 
     //*** Utility ***\\
-    //TODO: Progress bar - work in progress (no pun intended)
-    /*public Task<Void> getProgressbarUpdaterTask() {
-        return new Task<Void>() {
-            @Override
-            public Void call() {
-                Platform.runLater(() -> {
-                    int hourOfShutdown = ATSWatchman.LOADED_PRESET.getTimeOfShutdown().getHour();
-                    int minuteOfShutdown = ATSWatchman.LOADED_PRESET.getTimeOfShutdown().getMinute();
-                    int secondOfShutdown = ATSWatchman.LOADED_PRESET.getTimeOfShutdown().getSecond();
-
-                    LocalTime startTime = LocalTime.now();
-                    LocalTime endTime = LocalTime.of(hourOfShutdown, minuteOfShutdown, secondOfShutdown);
-
-                    int secondsBetween = endTime.toSecondOfDay() - startTime.toSecondOfDay();
-
-                    while (!ATSWatchman.THREADS_SHUTDOWN_COMMAND) {
-                        txtf_tts_hours.setText(String.valueOf(hourOfShutdown - LocalTime.now().getHour()));
-                        txtf_tts_minutes.setText(String.valueOf(minuteOfShutdown - LocalTime.now().getMinute()));
-
-                        prgb_tts_progress.setProgress((endTime.toSecondOfDay() + LocalTime.now().toSecondOfDay())/((double) secondsBetween));
-
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-                return null;
-            }
-
-        };
-    }*/
-
     private String getSelectedItem() {
         return lstv_available_presets.getSelectionModel().getSelectedItem();
     }
