@@ -18,9 +18,6 @@ public class Utils {
     public static class Paths{
         public static Path getPresetFilePath(String presetName) {
             return Path.of(ATSSettings.RESOURCE_DIRECTORY_ABS_PATH.toString(), presetName + ".properties");
-
-            //TODO: delete this later
-            //return Path.of(RESOURCE_DIRECTORY_ABS_PATH + "\\" + presetName + ".properties");
         }
         public static String getFilenameWithoutExtension(Path filePath) {
             return filePath.getFileName().toString().split("\\.")[0];
@@ -42,7 +39,7 @@ public class Utils {
         public static void openConfigWindowOf(String presetToEdit) throws IOException {
             ATSSettings.CURRENTLY_EDITED_PRESET_NAME = presetToEdit;
 
-            Parent root = FXMLLoader.load(Objects.requireNonNull(Utils.class.getResource("Config-View.fxml")));
+            Parent root = FXMLLoader.load(Objects.requireNonNull(Utils.class.getResource("../Config-View.fxml")));
 
             Scene scene = new Scene(root, 490, 302);
             Stage stage = new Stage();
@@ -59,7 +56,6 @@ public class Utils {
 
     public static void deletePresetFile(String fileName) throws Exception {
         Path filePath = Utils.Paths.getPresetFilePath(fileName);
-        //Path filePath = Path.of(ATSSettings.RESOURCE_DIRECTORY_ABS_PATH + "/" + fileName + ".properties");
 
         if (!Files.exists(filePath))
             throw new Exception("ERROR: Couldn't find preset file!");

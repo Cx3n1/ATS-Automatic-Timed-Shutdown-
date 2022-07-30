@@ -1,7 +1,6 @@
 package cx3n1.projects.ats.data;
 
 import cx3n1.projects.ats.ATSSettings;
-import cx3n1.projects.ats.ATSWatchman;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -85,7 +84,11 @@ public class Preset {
 
 
     //*** Other ***\\
-    public boolean checkIfTodayIsSelectedDay(DayOfWeek dayOfWeek) {
+    public boolean checkIfTodayIsChecked() {
+        return checkIfGivenDayIsChecked(LocalDateTime.now().getDayOfWeek());
+    }
+
+    public boolean checkIfGivenDayIsChecked(DayOfWeek dayOfWeek) {
         return switch (dayOfWeek) {
             case MONDAY -> days[0];
             case TUESDAY -> days[1];
@@ -139,7 +142,7 @@ public class Preset {
     }
 
     private static void checkIfAllPropertiesArePresentInFile(Properties prop) throws Exception {
-        for (String key : ATSSettings.PROPERTY_KEY_NAMES){
+        for (String key : ATSSettings.PROPERTY_KEY_NAMES) {
             if (!prop.containsKey(key))
                 throw new Exception("Error: property " + key + "is missing");
         }

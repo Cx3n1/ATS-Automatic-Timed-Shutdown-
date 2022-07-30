@@ -1,6 +1,7 @@
 package cx3n1.projects.ats;
 //Auto Timed Shutdown System
 
+import cx3n1.projects.ats.utilities.Alerts;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -28,12 +29,11 @@ public class ATSApp extends Application {
         try {
             ATSWatchman.startupSequence();
         } catch (Exception e){
+            Alerts.error("There has been a problem in startup sequence!");
             e.printStackTrace();
             System.exit(1);
         }
         launch();
     }
-
-
 }
 

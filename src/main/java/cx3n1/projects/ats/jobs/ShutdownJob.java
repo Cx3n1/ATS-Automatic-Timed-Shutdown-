@@ -14,7 +14,6 @@ public class ShutdownJob implements Job {
         try {
             ATSWatchman.shutdownSequence();
             ATSLogic.shutDownAfterGivenMinutes(ATSSettings.getLoadedWarningTime());
-            ATSSettings.killShutdownScheduler();
         } catch (Exception e) {
             Alerts.error("Couldn't shutdown system!");
             e.printStackTrace();

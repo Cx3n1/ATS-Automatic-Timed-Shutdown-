@@ -23,6 +23,7 @@ public class Alerts {
         }
     }
 
+
     public static void error(String text){
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error!");
@@ -57,6 +58,8 @@ public class Alerts {
         alert.showAndWait();
     }
 
+
+    //*** Utility ***\\
     private static void ringAlertSound() {
         if(alertSound != null) alertSound.run();
     }

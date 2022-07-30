@@ -22,7 +22,6 @@ import java.util.ResourceBundle;
 
 public class ConfigViewController implements Initializable {
 
-
     public LocalTimePicker tpkr_shutdown_time;
 
     public Slider sld_warning_time;
@@ -51,7 +50,7 @@ public class ConfigViewController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         sld_warning_time.valueProperty().addListener((observableValue, number, t1) -> onSliding());
 
-        txtf_name.setText(ATSSettings.CURRENTLY_EDITED_PRESET_NAME);
+        txtf_name.setText(ATSSettings.getCurrentlyEditedPresetName());
 
         try {
             fillConfigWindowFromPreset(Utils.Paths.getPresetFilePath(ATSSettings.CURRENTLY_EDITED_PRESET_NAME));
@@ -73,7 +72,6 @@ public class ConfigViewController implements Initializable {
         }
 
         String presetPath = Utils.Paths.getPresetFilePath(txtf_name.getText()).toString();
-        //String presetPath = ATSSettings.RESOURCE_DIRECTORY_ABS_PATH + "\\" + txtf_name.getText() + ".properties";
 
         try {
             Utils.Paths.createFileIfItDoesNotExists(presetPath);
@@ -94,7 +92,6 @@ public class ConfigViewController implements Initializable {
         if(!txtf_name.getText().equals(ATSSettings.CURRENTLY_EDITED_PRESET_NAME)){
             try {
                 Files.delete(Utils.Paths.getPresetFilePath(ATSSettings.CURRENTLY_EDITED_PRESET_NAME));
-                //Files.delete(Path.of(ATSSettings.RESOURCE_DIRECTORY_ABS_PATH + "\\" + ATSSettings.CURRENTLY_EDITED_PRESET_NAME + ".properties"));
             } catch (IOException e) {
                 Alerts.error("Couldn't delete old preset file!");
                 e.printStackTrace();
@@ -102,7 +99,12 @@ public class ConfigViewController implements Initializable {
         }
 
         if(ATSSettings.CURRENTLY_EDITED_PRESET_NAME.equals(ATSSettings.CURRENTLY_ACTIVE_PRESET_NAME)){
-            ATSSettings.setLoadedPreset(txtf_name.getText());
+            try {
+                ATSSettings.setLoadedPreset(txtf_name.getText());
+            } catch (Exception e) {
+                Alerts.error("Couldn't reset loaded preset name!");
+                e.printStackTrace();
+            }
         }
 
         closeThisWindow();
@@ -123,7 +125,7 @@ public class ConfigViewController implements Initializable {
     private void fillConfigWindowFromPreset(Path pathToPreset) throws Exception {
         fillConfigWindowFromPreset(Preset.loadPreset(pathToPreset));
     }
-    public void fillConfigWindowFromPreset(Preset preset){
+    private void fillConfigWindowFromPreset(Preset preset){
         tpkr_shutdown_time.setLocalTime(preset.getTimeOfShutdown());
 
         txtf_warning_time.setText(String.valueOf(preset.getWarningTime()));
@@ -158,7 +160,6 @@ public class ConfigViewController implements Initializable {
     private void closeThisWindow() {
         Stage stage = (Stage) btn_save.getScene().getWindow();
         stage.close();
-        //TODO: This should fix no reload after config window bug
         ATSWatchman.notifyChange();
     }
 }

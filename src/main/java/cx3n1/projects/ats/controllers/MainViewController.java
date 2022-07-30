@@ -2,16 +2,19 @@ package cx3n1.projects.ats.controllers;
 
 import cx3n1.projects.ats.ATSSettings;
 import cx3n1.projects.ats.ATSWatchman;
+import cx3n1.projects.ats.jobs.ProgressBarJob;
 import cx3n1.projects.ats.utilities.Alerts;
 import cx3n1.projects.ats.utilities.Utils;
 import cx3n1.projects.ats.data.Preset;
 import cx3n1.projects.ats.interfaces.IListener;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import org.quartz.SchedulerException;
+import org.quartz.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,6 +25,10 @@ import java.time.DateTimeException;
 import java.time.LocalTime;
 import java.util.Objects;
 import java.util.ResourceBundle;
+
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
+import static org.quartz.TriggerBuilder.newTrigger;
 
 public class MainViewController implements Initializable, IListener {
 
@@ -42,43 +49,17 @@ public class MainViewController implements Initializable, IListener {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         lstv_available_presets.setItems(listContent);
 
-        try {
-            updateParameters();
-        } catch (IOException e) {
-            Alerts.error("Couldn't reload preset list!");
-            e.printStackTrace();
-        }
+        updateParametersWithAppropriateExceptionHandling();
 
         ATSWatchman.addListener(this);
-
-        //TODO: progress bar thingie work this out later
-        //startProgressBar();
-
-        prgb_tts_progress.progressProperty().bind(ATSSettings.progress);
-
-        try {
-            ATSSettings.initializeProgressBarScheduler();
-        } catch (SchedulerException e) {
-            e.printStackTrace();
-        }
-
     }
 
-    //TODO: figure out progress bar
-    /*private void startProgressBar() {
-        ATSWatchman.PROGRESS_BAR_THREAD = new Thread(getProgressbarUpdaterTask());
-        ATSWatchman.PROGRESS_BAR_THREAD.setDaemon(true);
-        ATSWatchman.PROGRESS_BAR_THREAD.start();
-    }*/
 
     public void onClickReload(ActionEvent actionEvent) {
-        try {
-            updateParameters();
-        } catch (IOException e) {
-            Alerts.error("Couldn't reload preset list!");
-            e.printStackTrace();
-        }
+        updateParametersWithAppropriateExceptionHandling();
     }
+
+
 
     public void onClickSetPreset(ActionEvent actionEvent) {
         String selectedPreset = getSelectedItem();
@@ -88,13 +69,14 @@ public class MainViewController implements Initializable, IListener {
             return;
         }
 
-        ATSSettings.setLoadedPreset(selectedPreset);
         try {
-            updateParameters();
-        } catch (IOException e) {
-            Alerts.error("Couldn't reload preset list!");
+            ATSSettings.setLoadedPreset(selectedPreset);
+        } catch (Exception e) {
+            Alerts.error("Couldn't set preset!");
             e.printStackTrace();
         }
+
+        updateParametersWithAppropriateExceptionHandling();
     }
 
     public void onClickAddNew(ActionEvent actionEvent) {
@@ -174,7 +156,7 @@ public class MainViewController implements Initializable, IListener {
 
         try {
             zone_offset = txtf_current_time_zone.getText();
-            ATSSettings.changeTimeZone(zone_offset);
+            ATSSettings.setZoneOffset(zone_offset);
         } catch (DateTimeException e) {
             Alerts.error("Please select valid time zone: from -18:00 to +18:00 in format +/-hh:mm or +/-hh!\n(+/- means you write either - or +, e.g. => +04:30, -10:01, +00, -04 etc.)");
             e.printStackTrace();
@@ -197,11 +179,78 @@ public class MainViewController implements Initializable, IListener {
         txtf_tts_hours.setText(String.valueOf(timeOfShutdown.getHour()));
         txtf_tts_minutes.setText(String.valueOf(timeOfShutdown.getMinute()));
 
+        updateParametersWithAppropriateExceptionHandling();
+
         try {
-            updateParameters();
-        } catch (IOException e) {
-            Alerts.error("Couldn't reload preset list!");
+            ProgressBarController.initializeProgressBar(prgb_tts_progress);
+        } catch (SchedulerException e) {
+            Alerts.error("Couldn't load progress bar!");
             e.printStackTrace();
+        }
+
+    }
+
+
+    public static class ProgressBarController{
+        private static DoubleProperty PROGRESS = new SimpleDoubleProperty(0);
+        private static final JobKey jobKey = new JobKey("progressBar");
+        private static final TriggerKey trigKey = new TriggerKey("progressTrigger");
+
+
+        public static void initializeProgressBar(ProgressBar progressBar) throws SchedulerException {
+            progressBar.progressProperty().bind(PROGRESS);
+
+            if(!ATSSettings.getLoadedPreset().checkIfTodayIsChecked()){
+                progressBar.setDisable(true);
+                PROGRESS.set(1);
+                killProgressBar();
+                return;
+            } else if(progressBar.isDisabled()) {
+                progressBar.setDisable(false);
+            }
+
+            PROGRESS.set(calculateCurrentProgress());
+
+            startProgressBar();
+        }
+
+        public static void updateProgress(){
+            PROGRESS.set(calculateCurrentProgress());
+        }
+
+        public static void startProgressBar() throws SchedulerException {
+            killProgressBar();
+
+            JobDetail job = newJob(ProgressBarJob.class)
+                    .withIdentity(jobKey)
+                    .build();
+
+            //progress bar updates every second
+            Trigger trigger = newTrigger()
+                    .withIdentity(trigKey)
+                    .withSchedule(simpleSchedule()
+                            .withIntervalInSeconds(1)
+                            .repeatForever())
+                    .startNow()
+                    .build();
+
+            ATSSettings.scheduleJobOnScheduler(job, trigger);
+        }
+
+        public static void killProgressBar() throws SchedulerException {
+            ATSSettings.removeJobFromScheduler(jobKey);
+        }
+
+        //** Utility **\\
+        private static double calculateCurrentProgress(){
+            LocalTime shutdownTime = ATSSettings.getLoadedShutdownTime();
+
+            if(LocalTime.now().isBefore(shutdownTime)){
+                return ((double)LocalTime.now().toSecondOfDay())/shutdownTime.toSecondOfDay();
+            } else {
+                int totalTime = LocalTime.MAX.toSecondOfDay() - shutdownTime.toSecondOfDay();
+                return ((double) (LocalTime.now().toSecondOfDay() - shutdownTime.toSecondOfDay()))/totalTime;
+            }
         }
     }
 
@@ -226,6 +275,15 @@ public class MainViewController implements Initializable, IListener {
         Utils.deletePresetFile(givenPreset);
     }
 
+    private void updateParametersWithAppropriateExceptionHandling() {
+        try {
+            updateParameters();
+        } catch (IOException e) {
+            Alerts.error("Couldn't reload preset list!");
+            e.printStackTrace();
+        }
+    }
+
     public void updateParameters() throws IOException {
         txtf_current_preset.setText(ATSSettings.CURRENTLY_ACTIVE_PRESET_NAME);
         txtf_current_time_zone.setText(String.valueOf(ATSSettings.ZONE_OFFSET));
@@ -247,6 +305,6 @@ public class MainViewController implements Initializable, IListener {
 
     private boolean isPresetDefaultOrCurrent(String givenPreset) {
         return givenPreset.equals(txtf_current_preset.getText()) || givenPreset.equals("Default");
-        //this statically written Default seems like bad practice
+        //this statically written "Default" seems like bad practice
     }
 }

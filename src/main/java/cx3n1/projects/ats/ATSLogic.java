@@ -5,6 +5,7 @@ import cx3n1.projects.ats.jobs.ShutdownJob;
 import cx3n1.projects.ats.utilities.Alerts;
 import org.apache.commons.lang3.SystemUtils;
 import org.quartz.JobDetail;
+import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 
@@ -20,13 +21,8 @@ public class ATSLogic {
     public static void mainLogic() throws Exception {
         Preset currentPreset = ATSSettings.getLoadedPreset();
 
-        if(!currentPreset.checkIfTodayIsSelectedDay(LocalDate.now().getDayOfWeek()))
+        if(!currentPreset.checkIfGivenDayIsChecked(LocalDate.now().getDayOfWeek()))
             return;
-
-        //TODO: figure this out
-        /*ATSWatchman.PROGRESS_BAR_THREAD = new Thread(new ProgressBarRunnable());
-        ATSWatchman.PROGRESS_BAR_THREAD.setDaemon(true);
-        ATSWatchman.PROGRESS_BAR_THREAD.start();*/
 
         if(LocalTime.now().isBefore(currentPreset.getTimeOfShutdown())){
             scheduleShutdownWaiter(currentPreset);
@@ -58,20 +54,21 @@ public class ATSLogic {
     }
 
     private static void scheduleShutdownWaiter(Preset currentPreset) throws SchedulerException {
-        ATSSettings.initializeShutdownScheduler();
+        JobKey jobKey = new JobKey("shutdownWaiter");
 
         JobDetail job = newJob(ShutdownJob.class)
-                .withIdentity("waiter")
+                .withIdentity(jobKey)
                 .build();
 
         long epochTimeOfShutdown = currentPreset.getTimeOfShutdown().toEpochSecond(LocalDate.now(), ATSSettings.ZONE_OFFSET);
         Date dateOfShutdown = new Date((epochTimeOfShutdown - (long) currentPreset.getWarningTime() * 60) * 1000);
 
         Trigger trigger = newTrigger()
-                .withIdentity("waiterTrigger")
+                .withIdentity("shutdownTrigger")
                 .startAt(dateOfShutdown)
                 .build();
 
-        ATSSettings.getShutdownScheduler().scheduleJob(job, trigger);
+        ATSSettings.removeJobFromScheduler(jobKey);
+        ATSSettings.scheduleJobOnScheduler(job, trigger);
     }
 }
