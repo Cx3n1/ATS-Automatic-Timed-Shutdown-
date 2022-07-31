@@ -33,7 +33,7 @@ public class ATSSettings {
      */
     private static final String PROGRAM_DATA_FILE = "Data.properties";
 
-    public static void loadSettingsFromDataFile() throws Exception {
+    private static void loadSettingsFromDataFile() throws Exception {
         if (!Files.exists(Path.of(PROGRAM_DATA_FILE))) {
             throw new Exception("FATAL ERROR: Couldn't find Data file!");
         }
@@ -60,7 +60,7 @@ public class ATSSettings {
         }
     }
 
-    public static void saveSettingsIntoDataFile() throws Exception {
+    private static void saveSettingsIntoDataFile() throws Exception {
         if (!Files.exists(Path.of(PROGRAM_DATA_FILE))) {
             throw new Exception("FATAL ERROR: Couldn't find Data file!");
         }
@@ -203,7 +203,7 @@ public class ATSSettings {
 
     private static void killMainScheduler() throws SchedulerException {
         if (!MAIN_SCHEDULER.isShutdown())
-            MAIN_SCHEDULER.shutdown();
+            MAIN_SCHEDULER.shutdown(false);
     }
 
     public static void scheduleJobOnScheduler(JobDetail jobDetail, Trigger trigger) throws SchedulerException {
@@ -227,6 +227,10 @@ public class ATSSettings {
         setLoadedPreset(CURRENTLY_ACTIVE_PRESET_NAME);
     }
 
+    public static void shutdownSequence() throws Exception {
+        killMainScheduler();
+        saveSettingsIntoDataFile();
+    }
 
     //*** Utility ***\\
     private static void scheduleDayResetJob() throws SchedulerException {

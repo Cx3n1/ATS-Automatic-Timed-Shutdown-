@@ -17,7 +17,7 @@ public class ATSWatchman extends StaticObservable {
 
     public static void shutdownSequence() throws Exception {
         //could add some code here if needed...
-        ATSSettings.saveSettingsIntoDataFile();
+        ATSSettings.shutdownSequence();
     }
 
 }
