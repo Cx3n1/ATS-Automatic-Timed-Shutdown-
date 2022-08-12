@@ -1,7 +1,10 @@
 package cx3n1.projects.ats.utilities;
 
+import com.dustinredmond.fxtrayicon.FXTrayIcon;
+import cx3n1.projects.ats.ATSApp;
 import cx3n1.projects.ats.ATSSettings;
 import cx3n1.projects.ats.ATSWatchman;
+import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -65,3 +68,4 @@ public class Utils {
         ATSWatchman.notifyChange();
     }
 }
+

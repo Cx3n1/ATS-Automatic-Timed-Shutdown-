@@ -44,6 +44,7 @@ public class ATSApp extends Application {
             e.printStackTrace();
             System.exit(1);
         }
+
         launch();
     }
 
