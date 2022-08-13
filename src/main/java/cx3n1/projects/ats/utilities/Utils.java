@@ -1,10 +1,8 @@
 package cx3n1.projects.ats.utilities;
 
-import com.dustinredmond.fxtrayicon.FXTrayIcon;
-import cx3n1.projects.ats.ATSApp;
+import cx3n1.projects.ats.ATS;
 import cx3n1.projects.ats.ATSSettings;
 import cx3n1.projects.ats.ATSWatchman;
-import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -42,7 +40,7 @@ public class Utils {
         public static void openConfigWindowOf(String presetToEdit) throws IOException {
             ATSSettings.CURRENTLY_EDITED_PRESET_NAME = presetToEdit;
 
-            Parent root = FXMLLoader.load(Objects.requireNonNull(Utils.class.getResource("../Config-View.fxml")));
+            Parent root = FXMLLoader.load(Objects.requireNonNull(ATS.class.getResource("Config-View.fxml")));
 
             Scene scene = new Scene(root, 490, 302);
             Stage stage = new Stage();

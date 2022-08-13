@@ -17,7 +17,7 @@ import java.io.IOException;
 public class ATSApp extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(ATSApp.class.getResource("Main-View.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(ATS.class.getResource("Main-View.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 370, 390);
 
         FXTrayIcon trayIcon = new FXTrayIcon(stage);

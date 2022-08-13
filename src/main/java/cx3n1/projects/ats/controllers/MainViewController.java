@@ -14,6 +14,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import org.jetbrains.annotations.NotNull;
 import org.quartz.*;
 
 import java.io.FileNotFoundException;
@@ -197,7 +198,7 @@ public class MainViewController implements Initializable, IListener {
         private static final TriggerKey trigKey = new TriggerKey("progressTrigger");
 
 
-        public static void initializeProgressBar(ProgressBar progressBar) throws SchedulerException {
+        public static void initializeProgressBar(@NotNull ProgressBar progressBar) throws SchedulerException {
             progressBar.progressProperty().bind(PROGRESS);
 
             if(!ATSSettings.getLoadedPreset().checkIfTodayIsChecked()){
