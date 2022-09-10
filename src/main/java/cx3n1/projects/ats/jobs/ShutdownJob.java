@@ -12,7 +12,6 @@ public class ShutdownJob implements Job {
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         try {
-            ATSWatchman.shutdownSequence();
             ATSLogic.shutDownAfterGivenMinutes(ATSSettings.getLoadedWarningTime());
         } catch (Exception e) {
             Alerts.error("Couldn't shutdown system!");

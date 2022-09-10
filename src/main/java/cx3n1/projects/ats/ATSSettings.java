@@ -8,6 +8,7 @@ import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
 import java.io.*;
+import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,6 +29,25 @@ import static org.quartz.TriggerBuilder.newTrigger;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ATSSettings {
     /**
+     * safeguard mechanism to not launch program more than once
+     * lock one port using server socket which will be checked at launch for availability
+     */
+    private static int LOCK_PORT = 24000;
+    /**
+     * actual lock socket
+     */
+    private static ServerSocket LOCK_SOCKET;
+
+    private static void initializeLock() throws Exception{
+        try {
+            LOCK_SOCKET = new ServerSocket(LOCK_PORT);
+        } catch (Exception e){
+            throw new Exception("Program is already running!");
+        }
+    }
+
+
+    /**
      * file which will store all the info which needs to be saved after closing program
      * such as current preset and default location of resource files
      */
@@ -41,6 +61,8 @@ public class ATSSettings {
         try (FileInputStream fis = new FileInputStream(PROGRAM_DATA_FILE)) {
             Properties prop = new Properties();
             prop.load(fis);
+            LOCK_PORT = Integer.parseInt(prop.getProperty("LOCK_PORT"));
+
             RESOURCE_DIRECTORY_ABS_PATH = Paths.get(prop.getProperty("RESOURCE_DIRECTORY")).toAbsolutePath();
             CURRENTLY_ACTIVE_PRESET_NAME = prop.getProperty("CURRENTLY_ACTIVE_PRESET_NAME");
 
@@ -67,6 +89,7 @@ public class ATSSettings {
 
         try (FileOutputStream fos = new FileOutputStream(PROGRAM_DATA_FILE)) {
             Properties prop = new Properties();
+            prop.setProperty("LOCK_PORT", String.valueOf(LOCK_PORT));
             prop.setProperty("RESOURCE_DIRECTORY", RESOURCE_DIRECTORY_ABS_PATH.getFileName().toString());
             prop.setProperty("CURRENTLY_ACTIVE_PRESET_NAME", CURRENTLY_ACTIVE_PRESET_NAME);
 
@@ -217,8 +240,12 @@ public class ATSSettings {
     }
 
 
+    //**Other Functions**\\
+
     public static void startupSequence() throws Exception {
         loadSettingsFromDataFile();
+
+        initializeLock();
 
         startupMainScheduler();
 

@@ -3,3 +3,5 @@ out/
 target/
 aqlemi.txt
 ATS.iml
+*.jar
+*.bat
