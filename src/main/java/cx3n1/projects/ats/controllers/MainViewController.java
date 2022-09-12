@@ -56,11 +56,21 @@ public class MainViewController implements Initializable, IListener {
     }
 
 
-    public void onClickReload(ActionEvent actionEvent) {
-        updateParametersWithAppropriateExceptionHandling();
+    public void onClickMenuExit(ActionEvent actionEvent) {
+        try {
+            ATSWatchman.shutdownSequence();
+        } catch (Exception e) {
+            Alerts.error("Couldn't initiate shutdown sequence!");
+            e.printStackTrace();
+            return;
+        }
+        System.exit(0);
     }
 
 
+    public void onClickReload(ActionEvent actionEvent) {
+        updateParametersWithAppropriateExceptionHandling();
+    }
 
     public void onClickSetPreset(ActionEvent actionEvent) {
         String selectedPreset = getSelectedItem();
@@ -190,6 +200,8 @@ public class MainViewController implements Initializable, IListener {
         }
 
     }
+
+
 
 
     public static class ProgressBarController{

@@ -3,6 +3,9 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -11,11 +14,11 @@
 <?import javafx.scene.text.Text?>
 <?import jfxtras.scene.layout.VBox?>
 
-<AnchorPane prefHeight="390.0" prefWidth="370.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cx3n1.projects.ats.controllers.MainViewController">
+<AnchorPane prefHeight="400.0" prefWidth="360.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cx3n1.projects.ats.controllers.MainViewController">
    <children>
-      <AnchorPane layoutX="15.0" layoutY="64.0" prefHeight="314.0" prefWidth="313.0">
+      <AnchorPane layoutX="7.0" layoutY="77.0" prefHeight="314.0" prefWidth="313.0">
          <children>
-            <VBox layoutY="14.0" spacing="5.0">
+            <VBox layoutX="3.0" layoutY="23.0" spacing="5.0">
                <children>
                   <AnchorPane>
                      <children>
@@ -88,7 +91,7 @@
             </VBox>
          </children>
       </AnchorPane>
-      <AnchorPane layoutX="8.0" layoutY="14.0" prefHeight="50.0" prefWidth="354.0">
+      <AnchorPane layoutX="3.0" layoutY="38.0" prefHeight="50.0" prefWidth="354.0">
          <children>
             <ProgressBar fx:id="prgb_tts_progress" layoutX="6.0" layoutY="24.0" prefHeight="25.0" prefWidth="342.0" progress="0.0">
                <padding>
@@ -123,5 +126,14 @@
             </Text>
          </children>
       </AnchorPane>
+      <MenuBar prefHeight="25.0" prefWidth="360.0">
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem fx:id="menu_tm_exit" mnemonicParsing="false" onAction="#onClickMenuExit" text="Exit" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
    </children>
 </AnchorPane>

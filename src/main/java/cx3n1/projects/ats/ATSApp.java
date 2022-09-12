@@ -6,9 +6,10 @@ import cx3n1.projects.ats.utilities.Alerts;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
-
 import java.io.IOException;
+
 
 
 public class ATSApp extends Application {
@@ -23,15 +24,19 @@ public class ATSApp extends Application {
         }
 
         FXMLLoader fxmlLoader = new FXMLLoader(ATS.class.getResource("Main-View.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 370, 390);
+        Scene scene = new Scene(fxmlLoader.load(), 360, 400);
+        Image icon = new Image(ATSApp.class.getClassLoader().getResourceAsStream("icon.png"));
+
 
         FXTrayIcon trayIcon = new FXTrayIcon(stage);
         trayIcon.addExitItem("Exit", e -> {
             ATSWatchman.shutdownSequenceOnOpenStage(stage, trayIcon);
         });
+        trayIcon.setGraphic(icon); //apparently it needs javafx.swing added to vm options to work
         trayIcon.show();
 
-        stage.setTitle("ATS");
+        stage.getIcons().add(icon);
+        stage.setTitle("Automatic Timed Shutdown");
         stage.setResizable(false);
         stage.requestFocus();
         stage.toFront();
