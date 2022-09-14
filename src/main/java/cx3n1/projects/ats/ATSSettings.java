@@ -2,13 +2,14 @@ package cx3n1.projects.ats;
 
 import cx3n1.projects.ats.data.Preset;
 import cx3n1.projects.ats.jobs.DayResetJob;
+import cx3n1.projects.ats.utilities.DuplicateCheck;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
-import java.io.*;
-import java.net.ServerSocket;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,17 +34,9 @@ public class ATSSettings {
      * lock one port using server socket which will be checked at launch for availability
      */
     private static int LOCK_PORT = 24000;
-    /**
-     * actual lock socket
-     */
-    private static ServerSocket LOCK_SOCKET;
 
     private static void initializeLock() throws Exception{
-        try {
-            LOCK_SOCKET = new ServerSocket(LOCK_PORT);
-        } catch (Exception e){
-            throw new Exception("Program is already running!");
-        }
+        DuplicateCheck.launchLockWithExceptions(LOCK_PORT);
     }
 
 
@@ -241,7 +234,6 @@ public class ATSSettings {
 
 
     //**Other Functions**\\
-
     public static void startupSequence() throws Exception {
         loadSettingsFromDataFile();
 
@@ -259,6 +251,7 @@ public class ATSSettings {
         saveSettingsIntoDataFile();
     }
 
+
     //*** Utility ***\\
     private static void scheduleDayResetJob() throws SchedulerException {
         JobDetail job = newJob(DayResetJob.class)
@@ -273,6 +266,4 @@ public class ATSSettings {
 
         scheduleJobOnScheduler(job, trigger);
     }
-
-
 }

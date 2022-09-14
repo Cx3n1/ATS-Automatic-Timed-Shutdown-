@@ -5,3 +5,5 @@ aqlemi.txt
 *.iml
 *.jar
 *.bat
+*.psd
+*.iss
