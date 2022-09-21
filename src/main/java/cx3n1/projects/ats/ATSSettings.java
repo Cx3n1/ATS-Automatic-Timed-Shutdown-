@@ -5,6 +5,7 @@ import cx3n1.projects.ats.jobs.DayResetJob;
 import cx3n1.projects.ats.utilities.DuplicateCheck;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.SystemUtils;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
@@ -39,6 +40,20 @@ public class ATSSettings {
         DuplicateCheck.launchLockWithExceptions(LOCK_PORT);
     }
 
+    /**
+     * path to folder which will contain editable resource files of programs in specific OSes.
+     * eg: in windows AppData\ATS folder
+     */
+    private static String OS_DATA_FOLDER;
+    //TODO: add support for more OSes
+    private static void initializeDataFolder(){
+         if(SystemUtils.IS_OS_WINDOWS){
+             //TODO: System.getProperty(LOCALAPPDATA) doesn't work this is temporary solution till i find better way to do it :p
+             OS_DATA_FOLDER = System.getProperty("user.home") + "\\AppData\\Local\\ATS\\";
+
+             //C:\Users\Cx3n1\AppData\Local\ATS
+         }
+    }
 
     /**
      * file which will store all the info which needs to be saved after closing program
@@ -47,16 +62,18 @@ public class ATSSettings {
     private static final String PROGRAM_DATA_FILE = "Data.properties";
 
     private static void loadSettingsFromDataFile() throws Exception {
-        if (!Files.exists(Path.of(PROGRAM_DATA_FILE))) {
+        System.out.println(OS_DATA_FOLDER + PROGRAM_DATA_FILE);
+        //C:\Users\Cx3n1\AppData\Local\ATS
+        if (!Files.exists(Path.of(OS_DATA_FOLDER + PROGRAM_DATA_FILE))) {
             throw new Exception("FATAL ERROR: Couldn't find Data file!");
         }
 
-        try (FileInputStream fis = new FileInputStream(PROGRAM_DATA_FILE)) {
+        try (FileInputStream fis = new FileInputStream(OS_DATA_FOLDER + PROGRAM_DATA_FILE)) {
             Properties prop = new Properties();
             prop.load(fis);
             LOCK_PORT = Integer.parseInt(prop.getProperty("LOCK_PORT"));
 
-            RESOURCE_DIRECTORY_ABS_PATH = Paths.get(prop.getProperty("RESOURCE_DIRECTORY")).toAbsolutePath();
+            RESOURCE_DIRECTORY_ABS_PATH = Paths.get(OS_DATA_FOLDER + prop.getProperty("RESOURCE_DIRECTORY"));
             CURRENTLY_ACTIVE_PRESET_NAME = prop.getProperty("CURRENTLY_ACTIVE_PRESET_NAME");
 
             ZONE_OFFSET = ZoneOffset.of(prop.getProperty("CURRENT_TIME_ZONE"));
@@ -76,11 +93,11 @@ public class ATSSettings {
     }
 
     private static void saveSettingsIntoDataFile() throws Exception {
-        if (!Files.exists(Path.of(PROGRAM_DATA_FILE))) {
+        if (!Files.exists(Path.of(OS_DATA_FOLDER + PROGRAM_DATA_FILE))) {
             throw new Exception("FATAL ERROR: Couldn't find Data file!");
         }
 
-        try (FileOutputStream fos = new FileOutputStream(PROGRAM_DATA_FILE)) {
+        try (FileOutputStream fos = new FileOutputStream(OS_DATA_FOLDER + PROGRAM_DATA_FILE)) {
             Properties prop = new Properties();
             prop.setProperty("LOCK_PORT", String.valueOf(LOCK_PORT));
             prop.setProperty("RESOURCE_DIRECTORY", RESOURCE_DIRECTORY_ABS_PATH.getFileName().toString());
@@ -235,6 +252,8 @@ public class ATSSettings {
 
     //**Other Functions**\\
     public static void startupSequence() throws Exception {
+        initializeDataFolder();
+
         loadSettingsFromDataFile();
 
         initializeLock();
