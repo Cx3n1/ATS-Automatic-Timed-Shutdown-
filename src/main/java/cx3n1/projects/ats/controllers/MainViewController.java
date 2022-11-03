@@ -37,7 +37,6 @@ public class MainViewController implements Initializable, IListener {
     public TextField txtf_tts_hours;
     public TextField txtf_tts_minutes;
     public TextField txtf_current_preset;
-    public TextField txtf_current_time_zone;
     public ListView<String> lstv_available_presets = new ListView<>();
     public ObservableList<String> listContent = FXCollections.observableArrayList();
 
@@ -162,26 +161,6 @@ public class MainViewController implements Initializable, IListener {
         }
     }
 
-    public void onClickSetTimeZone(ActionEvent actionEvent) {
-        String zone_offset = "+0";
-
-        try {
-            zone_offset = txtf_current_time_zone.getText();
-            ATSSettings.setZoneOffset(zone_offset);
-        } catch (DateTimeException e) {
-            Alerts.error("Please select valid time zone: from -18:00 to +18:00 in format +/-hh:mm or +/-hh!\n(+/- means you write either - or +, e.g. => +04:30, -10:01, +00, -04 etc.)");
-            e.printStackTrace();
-            txtf_current_time_zone.setText(String.valueOf(ATSSettings.ZONE_OFFSET));
-            return;
-        } catch (Exception e) {
-            Alerts.error("Couldn't save data into data file!");
-            e.printStackTrace();
-            txtf_current_time_zone.setText(String.valueOf(ATSSettings.ZONE_OFFSET));
-            return;
-        }
-
-        Alerts.info("Time Zone saved!", "You have successfully set new time zone.");
-    }
 
     @Override
     public void update() {
@@ -200,8 +179,6 @@ public class MainViewController implements Initializable, IListener {
         }
 
     }
-
-
 
 
     public static class ProgressBarController{
@@ -299,7 +276,6 @@ public class MainViewController implements Initializable, IListener {
 
     public void updateParameters() throws IOException {
         txtf_current_preset.setText(ATSSettings.CURRENTLY_ACTIVE_PRESET_NAME);
-        txtf_current_time_zone.setText(String.valueOf(ATSSettings.ZONE_OFFSET));
         loadPresetList();
     }
 

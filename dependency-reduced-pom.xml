@@ -4,7 +4,7 @@
   <groupId>Cx3n1.Projects</groupId>
   <artifactId>ATS</artifactId>
   <name>ATS</name>
-  <version>0.7.5</version>
+  <version>0.8.0</version>
   <build>
     <plugins>
       <plugin>

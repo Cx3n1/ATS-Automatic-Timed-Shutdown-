@@ -11,8 +11,8 @@ import org.quartz.Trigger;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Date;
 
+import static org.quartz.CronScheduleBuilder.dailyAtHourAndMinute;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.newTrigger;
 
@@ -60,12 +60,15 @@ public class ATSLogic {
                 .withIdentity(jobKey)
                 .build();
 
-        long epochTimeOfShutdown = currentPreset.getTimeOfShutdown().toEpochSecond(LocalDate.now(), ATSSettings.ZONE_OFFSET);
-        Date dateOfShutdown = new Date((epochTimeOfShutdown - (long) currentPreset.getWarningTime() * 60) * 1000);
+        System.out.println(currentPreset.getTimeOfShutdown().getHour());
+        System.out.println(currentPreset.getTimeOfShutdown().getMinute());
 
         Trigger trigger = newTrigger()
                 .withIdentity("shutdownTrigger")
-                .startAt(dateOfShutdown)
+                .withSchedule(
+                        dailyAtHourAndMinute(
+                                currentPreset.getTimeOfShutdown().getHour(),
+                                currentPreset.getTimeOfShutdown().getMinute() - currentPreset.getWarningTime()))
                 .build();
 
         ATSSettings.removeJobFromScheduler(jobKey);

@@ -8,14 +8,10 @@ import javafx.stage.Stage;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-
-import static org.quartz.JobBuilder.newJob;
-
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ATSWatchman extends StaticObservable {
     public static void startupSequence() throws Exception {
+
         ATSSettings.startupSequence();
         //notifyChange() ATSSettings.startupSequence() will notify everybody, so extra notification is useless
         //ATSLogic.mainLogic(); same this is called in ATSSettings.startupSequence()

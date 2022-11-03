@@ -4,12 +4,15 @@ package cx3n1.projects.ats;
 import com.dustinredmond.fxtrayicon.FXTrayIcon;
 import cx3n1.projects.ats.utilities.Alerts;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import java.io.IOException;
+import javafx.stage.StageStyle;
 
+import java.io.IOException;
+import java.util.Objects;
 
 
 public class ATSApp extends Application {
@@ -25,8 +28,13 @@ public class ATSApp extends Application {
 
         FXMLLoader fxmlLoader = new FXMLLoader(ATS.class.getResource("Main-View.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 360, 400);
-        Image icon = new Image(ATSApp.class.getClassLoader().getResourceAsStream("icon.png"));
+        Image icon = new Image(
+                Objects.requireNonNull(
+                ATSApp.class.getClassLoader().getResourceAsStream("icon.png")
+                ));
 
+
+        Platform.setImplicitExit(false);
 
         FXTrayIcon trayIcon = new FXTrayIcon(stage);
         trayIcon.addExitItem("Exit", e -> {
@@ -35,6 +43,7 @@ public class ATSApp extends Application {
         trayIcon.setGraphic(icon); //apparently it needs javafx.swing added to vm options to work
         trayIcon.show();
 
+        stage.initStyle(StageStyle.DECORATED);
         stage.getIcons().add(icon);
         stage.setTitle("Automatic Timed Shutdown");
         stage.setResizable(false);
@@ -47,7 +56,18 @@ public class ATSApp extends Application {
 
 
     public static void main(String[] args) {
+        //new Thread(new test()).start();
         launch();
+    }
+
+    static class test implements Runnable{
+
+        @Override
+        public void run() {
+            while (true) {
+                System.out.println("WOOO");
+            }
+        }
     }
 }
 

@@ -16,7 +16,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -37,8 +36,18 @@ public class ATSSettings {
     private static int LOCK_PORT = 24000;
 
     private static void initializeLock() throws Exception{
-        DuplicateCheck.launchLockWithExceptions(LOCK_PORT);
+        if(!ALREADY_LOCKED){
+            DuplicateCheck.launchLockWithExceptions(LOCK_PORT);
+            ALREADY_LOCKED = true;
+        }
     }
+
+    /**
+     * mechanism to make sure lock initialization doesn't fire second time when day reset happens
+     * ALREADY_LOCKED will become true when lock will be set for the first time
+     */
+    private static boolean ALREADY_LOCKED = false;
+
 
     /**
      * path to folder which will contain editable resource files of programs in specific OSes.
@@ -62,8 +71,7 @@ public class ATSSettings {
     private static final String PROGRAM_DATA_FILE = "Data.properties";
 
     private static void loadSettingsFromDataFile() throws Exception {
-        System.out.println(OS_DATA_FOLDER + PROGRAM_DATA_FILE);
-        //C:\Users\Cx3n1\AppData\Local\ATS
+
         if (!Files.exists(Path.of(OS_DATA_FOLDER + PROGRAM_DATA_FILE))) {
             throw new Exception("FATAL ERROR: Couldn't find Data file!");
         }
@@ -76,7 +84,6 @@ public class ATSSettings {
             RESOURCE_DIRECTORY_ABS_PATH = Paths.get(OS_DATA_FOLDER + prop.getProperty("RESOURCE_DIRECTORY"));
             CURRENTLY_ACTIVE_PRESET_NAME = prop.getProperty("CURRENTLY_ACTIVE_PRESET_NAME");
 
-            ZONE_OFFSET = ZoneOffset.of(prop.getProperty("CURRENT_TIME_ZONE"));
 
             PROPERTY_KEY_NAMES = new ArrayList<>();
             PROPERTY_KEY_NAMES.add(prop.getProperty("PROPERTY_KEY_NAMES_0"));
@@ -103,7 +110,6 @@ public class ATSSettings {
             prop.setProperty("RESOURCE_DIRECTORY", RESOURCE_DIRECTORY_ABS_PATH.getFileName().toString());
             prop.setProperty("CURRENTLY_ACTIVE_PRESET_NAME", CURRENTLY_ACTIVE_PRESET_NAME);
 
-            prop.setProperty("CURRENT_TIME_ZONE", ZONE_OFFSET.getId());
 
             prop.setProperty("PROPERTY_KEY_NAMES_0", PROPERTY_KEY_NAMES.get(0));
             prop.setProperty("PROPERTY_KEY_NAMES_1", PROPERTY_KEY_NAMES.get(1));
@@ -118,22 +124,6 @@ public class ATSSettings {
 
             prop.store(fos, "Data last updated on: " + LocalDateTime.now());
         }
-    }
-
-
-    /**
-     * time zone offset of user (UTC +0 by default)
-     */
-    public static ZoneOffset ZONE_OFFSET = ZoneOffset.ofHours(0);
-
-    public static ZoneOffset getZoneOffset() {
-        return ZONE_OFFSET;
-    }
-
-    public static void setZoneOffset(String zoneID) throws Exception {
-        ZONE_OFFSET = ZoneOffset.of(zoneID);
-        saveSettingsIntoDataFile();
-        ATSWatchman.notifyChange();
     }
 
 
@@ -228,14 +218,13 @@ public class ATSSettings {
     private static Scheduler MAIN_SCHEDULER;
 
     private static void startupMainScheduler() throws SchedulerException {
-        if (MAIN_SCHEDULER != null)
-            killMainScheduler();
+        killMainScheduler();
         MAIN_SCHEDULER = StdSchedulerFactory.getDefaultScheduler();
         MAIN_SCHEDULER.start();
     }
 
     private static void killMainScheduler() throws SchedulerException {
-        if (!MAIN_SCHEDULER.isShutdown())
+        if (MAIN_SCHEDULER != null && !MAIN_SCHEDULER.isShutdown())
             MAIN_SCHEDULER.shutdown(false);
     }
 
@@ -252,17 +241,24 @@ public class ATSSettings {
 
     //**Other Functions**\\
     public static void startupSequence() throws Exception {
+        System.out.println("Entered");
         initializeDataFolder();
+        System.out.println("Data folder done");
 
         loadSettingsFromDataFile();
+        System.out.println("Loaded settings");
 
         initializeLock();
+        System.out.println("Locking");
 
         startupMainScheduler();
+        System.out.println("Main scheduler started up");
 
         scheduleDayResetJob();
+        System.out.println("Day reset scheduled");
 
         setLoadedPreset(CURRENTLY_ACTIVE_PRESET_NAME);
+        System.out.println("Set preset name");
     }
 
     public static void shutdownSequence() throws Exception {
@@ -273,16 +269,19 @@ public class ATSSettings {
 
     //*** Utility ***\\
     private static void scheduleDayResetJob() throws SchedulerException {
+        JobKey jobKey = new JobKey("dayResetter");
+
         JobDetail job = newJob(DayResetJob.class)
-                .withIdentity("dayResetter")
+                .withIdentity(jobKey)
                 .build();
 
         //TODO: test if this works
         Trigger trigger = newTrigger()
                 .withIdentity("resetTrigger")
-                .withSchedule(dailyAtHourAndMinute(0, 0))
+                .withSchedule(dailyAtHourAndMinute(23, 59))
                 .build();
 
+        ATSSettings.removeJobFromScheduler(jobKey);
         scheduleJobOnScheduler(job, trigger);
     }
 }

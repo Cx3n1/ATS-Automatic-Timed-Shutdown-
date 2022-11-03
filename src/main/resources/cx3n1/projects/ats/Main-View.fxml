@@ -27,22 +27,7 @@
                               <Font name="Consolas" size="22.0" />
                            </font>
                         </Text>
-                        <TextField fx:id="txtf_current_preset" editable="false" layoutY="27.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="210.0" />
-                        <Text fill="#514e4e" layoutX="216.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Time Zone:" wrappingWidth="124.0">
-                           <font>
-                              <Font name="Consolas" size="22.0" />
-                           </font>
-                        </Text>
-                        <TextField fx:id="txtf_current_time_zone" alignment="CENTER" layoutX="216.0" layoutY="27.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="32.0" prefWidth="71.0" text="+4:00">
-                           <font>
-                              <Font name="Century Gothic Bold" size="15.0" />
-                           </font>
-                        </TextField>
-                        <Button fx:id="btn_set_time_zone" layoutX="292.0" layoutY="29.0" mnemonicParsing="false" onAction="#onClickSetTimeZone" prefHeight="28.0" prefWidth="48.0" text="Set">
-                           <font>
-                              <Font name="Consolas" size="13.0" />
-                           </font>
-                        </Button>
+                        <TextField fx:id="txtf_current_preset" editable="false" layoutY="27.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="340.0" />
                      </children>
                   </AnchorPane>
                   <Text fill="#514e4e" strokeType="OUTSIDE" strokeWidth="0.0" text="Available Presets" wrappingWidth="210.0">
