@@ -3,6 +3,7 @@ package cx3n1.projects.ats;
 import cx3n1.projects.ats.data.Preset;
 import cx3n1.projects.ats.jobs.ShutdownJob;
 import cx3n1.projects.ats.utilities.Alerts;
+import cx3n1.projects.ats.utilities.Utils;
 import org.apache.commons.lang3.SystemUtils;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
@@ -63,12 +64,14 @@ public class ATSLogic {
         System.out.println(currentPreset.getTimeOfShutdown().getHour());
         System.out.println(currentPreset.getTimeOfShutdown().getMinute());
 
+        int minutes = currentPreset.getTimeOfShutdown().getMinute() - currentPreset.getWarningTime();
+        int hours = currentPreset.getTimeOfShutdown().getHour() - (minutes < 0 ? 1 : 0);
+        minutes = Utils.minuteModulus(currentPreset.getTimeOfShutdown().getMinute(), currentPreset.getWarningTime());
+
         Trigger trigger = newTrigger()
                 .withIdentity("shutdownTrigger")
                 .withSchedule(
-                        dailyAtHourAndMinute(
-                                currentPreset.getTimeOfShutdown().getHour(),
-                                currentPreset.getTimeOfShutdown().getMinute() - currentPreset.getWarningTime()))
+                        dailyAtHourAndMinute(hours, minutes))
                 .build();
 
         ATSSettings.removeJobFromScheduler(jobKey);

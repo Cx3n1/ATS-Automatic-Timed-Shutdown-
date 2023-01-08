@@ -68,5 +68,10 @@ public class Utils {
 
         ATSWatchman.notifyChange();
     }
+
+    public static int minuteModulus(int first, int second){
+        if(first - second < 0) return 60 - (second - first);
+        else return first - second;
+    }
 }
 

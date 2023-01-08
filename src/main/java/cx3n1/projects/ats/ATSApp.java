@@ -51,23 +51,12 @@ public class ATSApp extends Application {
         stage.toFront();
 
         stage.setScene(scene);
-        stage.show();
+        //stage.show();
     }
 
-
     public static void main(String[] args) {
-        //new Thread(new test()).start();
         launch();
     }
 
-    static class test implements Runnable{
-
-        @Override
-        public void run() {
-            while (true) {
-                System.out.println("WOOO");
-            }
-        }
-    }
 }
 

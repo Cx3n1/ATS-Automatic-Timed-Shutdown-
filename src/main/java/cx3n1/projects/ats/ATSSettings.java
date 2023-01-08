@@ -278,7 +278,7 @@ public class ATSSettings {
         //TODO: test if this works
         Trigger trigger = newTrigger()
                 .withIdentity("resetTrigger")
-                .withSchedule(dailyAtHourAndMinute(23, 59))
+                .withSchedule(dailyAtHourAndMinute(0, 1))
                 .build();
 
         ATSSettings.removeJobFromScheduler(jobKey);
